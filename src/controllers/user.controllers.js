@@ -92,52 +92,50 @@ const register = async(req,res)=>{
 // }
 
 
-
 const login = async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email) {
-        return res.status(400).json({ message: "Please enter an email" });
-    }
-    if (!password) {
-        return res.status(400).json({ message: "Please enter a password" });
-    }
-
     try {
-        const user = await FbUser.findOne({ email: email });
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        const { email, password } = req.body;
 
-        const isPassword = await bcrypt.compare(password, user.password);
-        if (!isPassword) {
-            return res.status(401).json({ message: "Invalid password" });
-        }
+        // Validate input
+        if (!email) return res.status(400).json({ message: "Please enter an email" });
+        if (!password) return res.status(400).json({ message: "Please enter a password" });
 
-        // Token generation
-        const access = generateAccessToken(user);
-        const refresh = generateRefreshToken(user);
+        // Check if user exists
+        const user = await FbUser.findOne({ email });
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-        // Secure cookie setup
-        res.cookie('refresh', refresh, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Secure cookie in production
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) return res.status(401).json({ message: "Invalid password" });
+
+        // Generate tokens
+        const accessToken = generateAccessToken(user); // Short-lived token (e.g., 15 mins)
+        const refreshToken = generateRefreshToken(user); // Long-lived token (e.g., 7 days)
+
+        // Set refresh token in HttpOnly cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === "production", // Ensure secure cookies in production
             sameSite: "strict", 
-            path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
-        // Respond to client
+        // Send response with access token and user data
         res.status(200).json({
             message: "User logged in successfully",
-            access,
-            data: { id: user._id, email: user.email, name: user.name } // Avoid sending sensitive data
+            accessToken,
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name
+            }
         });
     } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).json({ message: "Something went wrong" });
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 
 
