@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     // profileImage : {
     //     type : String,
-    //     required:true
+    //     required : true,
     // },
     posts :[{
         type : mongoose.Schema.Types.ObjectId,
@@ -34,4 +34,4 @@ userSchema.pre("save",async function(next){
     next()
 })
 
-export default mongoose.model("User",userSchema)
+export default mongoose.model("FbUser",userSchema)
