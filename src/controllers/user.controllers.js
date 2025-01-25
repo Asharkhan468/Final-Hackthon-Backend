@@ -63,33 +63,82 @@ const register = async(req,res)=>{
 
 
 
-const login = async (req,res)=>{
-    const {email,password} = req.body;
-    if(!email) return res.status(404).json({message : "Please enter a email"})        
-    if(!password) return res.status(404).json({message : "Please enter a password"})
+// const login = async (req,res)=>{
+//     const {email,password} = req.body;
+//     if(!email) return res.status(404).json({message : "Please enter a email"})        
+//     if(!password) return res.status(404).json({message : "Please enter a password"})
 
-    const user = await FbUser.findOne ({email:email})
-    if(!user) return res.status(404).json({message : "User not found"})
+//     const user = await FbUser.findOne ({email:email})
+//     if(!user) return res.status(404).json({message : "User not found"})
     
-    const isPassword = await bcrypt.compare(password, user.password)
-    if(!isPassword) return res.status(404).json({message : "password mismatch"})
+//     const isPassword = await bcrypt.compare(password, user.password)
+//     if(!isPassword) return res.status(404).json({message : "password mismatch"})
 
-    const access = generateAccessToken(user)
-    const refresh = generateRefreshToken(user)
+//     const access = generateAccessToken(user)
+//     const refresh = generateRefreshToken(user)
 
-    res.cookie('refresh', refresh, {
-        httpOnly: true,
-        secure: false,  
-        sameSite: "strict", 
-    })
+//     res.cookie('refresh', refresh, {
+//         httpOnly: true,
+//         secure: false,  
+//         sameSite: "strict", 
+//     })
 
-    res.status(200).json({
-        message : "User logged in successfully",
-        access,
-        refresh,
-        data : user
-    })
-}
+//     res.status(200).json({
+//         message : "User logged in successfully",
+//         access,
+//         refresh,
+//         data : user
+//     })
+// }
+
+
+
+const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: "Please enter an email" });
+    }
+    if (!password) {
+        return res.status(400).json({ message: "Please enter a password" });
+    }
+
+    try {
+        const user = await FbUser.findOne({ email: email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const isPassword = await bcrypt.compare(password, user.password);
+        if (!isPassword) {
+            return res.status(401).json({ message: "Invalid password" });
+        }
+
+        // Token generation
+        const access = generateAccessToken(user);
+        const refresh = generateRefreshToken(user);
+
+        // Secure cookie setup
+        res.cookie('refresh', refresh, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // Secure cookie in production
+            sameSite: "strict", 
+            path: "/",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+        // Respond to client
+        res.status(200).json({
+            message: "User logged in successfully",
+            access,
+            data: { id: user._id, email: user.email, name: user.name } // Avoid sending sensitive data
+        });
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).json({ message: "Something went wrong" });
+    }
+};
+
 
 
 const logout = async (req,res)=>{
