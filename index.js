@@ -16,7 +16,7 @@ dotenv.config()
 const app = express()
 
 app.use(cors({
-  origin:"https://final-hackthon-frontend.vercel.app",
+  origin:"https://final-hackthon-frontend.vercel.app" || "http://localhost:5173",
   credentials: true,
   exposedHeaders:["set-cookie"]
 }))
