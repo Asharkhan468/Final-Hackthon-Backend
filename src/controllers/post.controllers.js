@@ -1,5 +1,5 @@
 import FbPost from "../models/post.models.js"
-import FbUser from "../models/user.models.js"
+import FbUser from "../models/userModel.js"
 import { v2 as cloudinary } from "cloudinary";
 import bcrypt from "bcrypt";
 import fs from "fs";
