@@ -4,6 +4,7 @@ import connectDB from './src/db/index.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
 import userRouter from "./src/routes/user.route.js"
+import blogRoutes from './src/routes/blog.route.js';
 // import postRouter from "./src/routes/post.route.js"
 
 
@@ -15,7 +16,7 @@ dotenv.config()
 const app = express()
 
 app.use(cors({
-  origin:"http://localhost:5173",
+  origin:"https://final-hackthon-frontend.vercel.app",
   credentials: true,
   exposedHeaders:["set-cookie"]
 }))
@@ -29,7 +30,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/user",userRouter)
-// app.use("/api/userPost",postRouter)
+
+app.use('/api/blogs', blogRoutes);
+
 
 
 
