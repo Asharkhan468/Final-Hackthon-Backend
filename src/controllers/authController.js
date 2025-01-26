@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "../models/userModel.js";
 import nodemailer from "nodemailer";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 // Set up email transport
 const transporter = nodemailer.createTransport({
@@ -12,16 +12,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
-
-
 const registerUser = async (req, res) => {
   const { name, email, cnic, role } = req.body;
 
   // Generate a random password
-  const randomPassword = Math.random().toString(36).slice(-8)
+  const randomPassword = Math.random().toString(36).slice(-8);
 
-  
   try {
     // Hash the password
 
@@ -56,7 +52,8 @@ const registerUser = async (req, res) => {
     // Respond to the client
     res.status(201).json({
       success: true,
-      message: "User registered successfully. Please check your email to log in.",
+      message:
+        "User registered successfully. Please check your email to log in.",
       user: {
         name: user.name,
         email: user.email,
@@ -73,10 +70,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-
-
-//login user 
-
+//login user
 
 const loginUser = async (req, res) => {
   const { cnic, password } = req.body;
@@ -138,6 +132,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-
-export  { registerUser, loginUser };
-
+export { registerUser, loginUser };

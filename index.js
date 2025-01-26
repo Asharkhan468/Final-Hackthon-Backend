@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./src/routes/authRoutes.js";
 import loanRoutes from "./src/routes/loanRoutes.js";
+import loanApplication from "./src/routes/applicationRoutes.js"
 
 
 dotenv.config();
@@ -25,8 +26,9 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.use("/api/loans", loanRoutes);
+app.use("/api/loans", loanRoutes , loanApplication);
 app.use("/api/auth", authRoutes);
+
 
 
 
